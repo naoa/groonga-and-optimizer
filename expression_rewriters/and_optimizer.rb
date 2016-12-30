@@ -27,8 +27,6 @@ module Groonga
         codes = @expression.codes
         codes.each do |code|
           case code.op
-          when Operator::PREFIX, Operator::NEAR, Operator::SIMILAR
-            unsupported = true
           when Operator::PUSH
             case code.value
             when PatriciaTrie, VariableSizeColumn
