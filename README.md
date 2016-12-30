@@ -1,7 +1,7 @@
 # Groonga and optimizer plugin
 
-ANDクエリのOptimizer
-ヒット数の少なそうなANDクエリが先に実行されるようにクエリの順番を書きかえる
+ANDクエリのOptimizer  
+ヒット数の少なそうなANDクエリが先に実行されるようにクエリの順番を書きかえる  
 selector関数の場合は最後に呼び出し順に実行される
 
 実験用。 とりあえず、使いたい用途で使えるもの
