@@ -1,0 +1,26 @@
+plugin_register expression_rewriters/and_optimizer
+
+table_create expression_rewriters TABLE_HASH_KEY ShortText
+column_create expression_rewriters plugin_name COLUMN_SCALAR Text
+
+load --table expression_rewriters
+[
+{"_key": "and_optimizer", "plugin_name": "expression_rewriters/and_optimizer"}
+]
+
+table_create Entries TABLE_NO_KEY
+column_create Entries title COLUMN_SCALAR ShortText
+column_create Entries body COLUMN_SCALAR ShortText
+
+table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenBigram --normalizer NormalizerAuto
+column_create Terms title_body COLUMN_INDEX|WITH_POSITION|WITH_SECTION Entries title,body
+
+load --table Entries
+[
+{"title": "Groonga and MySQL", "body": "Groonga PostgreSQL"}
+]
+
+
+select Terms
+
+select Entries --filter 'query("Terms.title_body||Terms.title_body", "Groonga PostgreSQL")'

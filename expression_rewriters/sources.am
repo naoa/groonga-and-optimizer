@@ -1,0 +1,2 @@
+expression_rewriters =				\
+	and_optimizer.rb

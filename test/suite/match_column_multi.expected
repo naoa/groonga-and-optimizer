@@ -1,0 +1,109 @@
+plugin_register expression_rewriters/and_optimizer
+[[0,0.0,0.0],true]
+table_create expression_rewriters TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+column_create expression_rewriters plugin_name COLUMN_SCALAR Text
+[[0,0.0,0.0],true]
+load --table expression_rewriters
+[
+{"_key": "and_optimizer", "plugin_name": "expression_rewriters/and_optimizer"}
+]
+[[0,0.0,0.0],1]
+table_create Entries TABLE_NO_KEY
+[[0,0.0,0.0],true]
+column_create Entries title COLUMN_SCALAR ShortText
+[[0,0.0,0.0],true]
+column_create Entries body COLUMN_SCALAR ShortText
+[[0,0.0,0.0],true]
+table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenBigram --normalizer NormalizerAuto
+[[0,0.0,0.0],true]
+column_create Terms title_body COLUMN_INDEX|WITH_POSITION|WITH_SECTION Entries title,body
+[[0,0.0,0.0],true]
+load --table Entries
+[
+{"title": "Groonga and MySQL", "body": "Groonga PostgreSQL"}
+]
+[[0,0.0,0.0],1]
+select Terms
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    [
+      [
+        4
+      ],
+      [
+        [
+          "_id",
+          "UInt32"
+        ],
+        [
+          "_key",
+          "ShortText"
+        ],
+        [
+          "title_body",
+          "UInt32"
+        ]
+      ],
+      [
+        2,
+        "and",
+        1
+      ],
+      [
+        1,
+        "groonga",
+        4
+      ],
+      [
+        3,
+        "mysql",
+        1
+      ],
+      [
+        4,
+        "postgresql",
+        1
+      ]
+    ]
+  ]
+]
+select Entries --filter 'query("title||body", "Groonga PostgreSQL")'
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    [
+      [
+        1
+      ],
+      [
+        [
+          "_id",
+          "UInt32"
+        ],
+        [
+          "body",
+          "ShortText"
+        ],
+        [
+          "title",
+          "ShortText"
+        ]
+      ],
+      [
+        1,
+        "Groonga PostgreSQL",
+        "Groonga and MySQL"
+      ]
+    ]
+  ]
+]
