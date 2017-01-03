@@ -4,7 +4,7 @@ module Groonga
       register "and_optimizer"
 
       def rewrite
-        return @expression if check_unsupported_code
+        return nil if check_unsupported_code
 
         builder = ExpressionTreeBuilder.new(@expression)
         root_node = builder.build
