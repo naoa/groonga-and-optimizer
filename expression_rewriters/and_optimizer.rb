@@ -92,14 +92,14 @@ module Groonga
           end
           estimated_costs.max
         else
-          0
+          nil
         end
       end
 
       def optimize_and_sub_nodes(table, sub_nodes)
         n_func = 0
         optimized_nodes = sub_nodes.sort_by do |node|
-          estimated_cost = 0
+          estimated_cost = nil
           case node
           when ExpressionTree::BinaryOperation
             if node.right.is_a?(ExpressionTree::Constant)
@@ -128,7 +128,7 @@ module Groonga
             estimated_cost = ID::MAX + n_func
             n_func += 1
           end
-          if estimated_cost > 0
+          if estimated_cost
             estimated_cost
           else
             node.estimate_size(table)
