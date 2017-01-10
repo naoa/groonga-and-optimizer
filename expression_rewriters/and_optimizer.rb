@@ -52,21 +52,6 @@ module Groonga
           end
           ExpressionTree::LogicalOperation.new(node.operator,
                                                optimized_sub_nodes)
-        when ExpressionTree::BinaryOperation
-          optimized_left = optimize_node(table, node.left)
-          optimized_right = optimize_node(table, node.right)
-          if optimized_left.is_a?(ExpressionTree::Constant) and
-              optimized_right.is_a?(ExpressionTree::Variable)
-            ExpressionTree::BinaryOperation.new(node.operator,
-                                                optimized_right,
-                                                optimized_left)
-          elsif node.left == optimized_left and node.right == optimized_right
-            node
-          else
-            ExpressionTree::BinaryOperation.new(node.operator,
-                                                optimized_left,
-                                                optimized_right)
-          end
         else
           node
         end
