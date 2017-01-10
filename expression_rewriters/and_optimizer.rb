@@ -106,7 +106,6 @@ module Groonga
           when ExpressionTree::FunctionCall
             case node.procedure.object.name
             when "tag_search"
-              # should override Groonga::ExpressionTree::FunctionCall#estimate_size
               column = node.arguments.first
               queries = node.arguments.select { |argument| argument.is_a?(ExpressionTree::Constant) }
               estimated_costs = queries.map do |query|
