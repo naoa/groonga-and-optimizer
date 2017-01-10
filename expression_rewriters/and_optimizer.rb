@@ -81,9 +81,8 @@ module Groonga
         end
       end
 
-      def optimize_and_sub_nodes(table, sub_nodes)
-        n_func = 0
-        optimized_nodes = sub_nodes.sort_by do |node|
+      def sort_nodes(table, nodes)
+        nodes.sort_by do |node|
           estimated_cost = nil
           case node
           when ExpressionTree::BinaryOperation
@@ -109,9 +108,6 @@ module Groonga
                 estimated_cost = node_estimate_size_for_query(node.left, query)
               end
             end
-          when ExpressionTree::FunctionCall
-            estimated_cost = ID::MAX + n_func
-            n_func += 1
           end
           if estimated_cost
             estimated_cost
@@ -119,6 +115,26 @@ module Groonga
             node.estimate_size(table)
           end
         end
+      end
+
+      def optimize_and_sub_nodes(table, sub_nodes)
+        optimized_nodes = []
+        target_nodes = []
+        while sub_nodes.any?
+          node = sub_nodes.shift
+          case node
+          when ExpressionTree::FunctionCall
+            optimized_nodes += sort_nodes(table, target_nodes)
+            optimized_nodes.push(node)
+            target_nodes = []
+          else
+            target_nodes.push(node)
+          end
+        end
+        if target_nodes.any?
+          optimized_nodes += sort_nodes(table, target_nodes)
+        end
+        optimized_nodes
       end
     end
   end
