@@ -1,0 +1,121 @@
+plugin_register expression_rewriters/and_optimizer
+[[0,0.0,0.0],true]
+table_create expression_rewriters TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+column_create expression_rewriters plugin_name COLUMN_SCALAR Text
+[[0,0.0,0.0],true]
+load --table expression_rewriters
+[
+{"_key": "and_optimizer", "plugin_name": "expression_rewriters/and_optimizer"}
+]
+[[0,0.0,0.0],1]
+table_create Entries TABLE_NO_KEY
+[[0,0.0,0.0],true]
+column_create Entries title COLUMN_SCALAR ShortText
+[[0,0.0,0.0],true]
+column_create Entries body COLUMN_SCALAR ShortText
+[[0,0.0,0.0],true]
+column_create Entries num COLUMN_SCALAR Int32
+[[0,0.0,0.0],true]
+table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenBigram --normalizer NormalizerAuto
+[[0,0.0,0.0],true]
+column_create Terms title_body COLUMN_INDEX|WITH_POSITION|WITH_SECTION Entries title,body
+[[0,0.0,0.0],true]
+table_create Numbers TABLE_PAT_KEY Int32
+[[0,0.0,0.0],true]
+column_create Numbers index COLUMN_INDEX|WITH_POSITION|WITH_SECTION Entries num
+[[0,0.0,0.0],true]
+load --table Entries
+[
+{"title": "Groonga and MySQL", "body": "Groonga PostgreSQL", "num": 4},
+{"title": "Groonga and MySQL", "body": "Groonga PostgreSQL", "num": 6}
+]
+[[0,0.0,0.0],2]
+select Terms
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    [
+      [
+        4
+      ],
+      [
+        [
+          "_id",
+          "UInt32"
+        ],
+        [
+          "_key",
+          "ShortText"
+        ],
+        [
+          "title_body",
+          "UInt32"
+        ]
+      ],
+      [
+        2,
+        "and",
+        5
+      ],
+      [
+        1,
+        "groonga",
+        6
+      ],
+      [
+        3,
+        "mysql",
+        6
+      ],
+      [
+        4,
+        "postgresql",
+        5
+      ]
+    ]
+  ]
+]
+select Entries --filter 'Terms.title_body @ "Groonga" && Terms.title_body @ "PostgreSQL" && num > 4'
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    [
+      [
+        1
+      ],
+      [
+        [
+          "_id",
+          "UInt32"
+        ],
+        [
+          "body",
+          "ShortText"
+        ],
+        [
+          "num",
+          "Int32"
+        ],
+        [
+          "title",
+          "ShortText"
+        ]
+      ],
+      [
+        2,
+        "Groonga PostgreSQL",
+        6,
+        "Groonga and MySQL"
+      ]
+    ]
+  ]
+]
