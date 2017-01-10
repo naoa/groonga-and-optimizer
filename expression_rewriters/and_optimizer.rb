@@ -125,8 +125,7 @@ module Groonga
       def optimize_and_sub_nodes(table, sub_nodes)
         optimized_nodes = []
         target_nodes = []
-        while sub_nodes.any?
-          node = sub_nodes.shift
+        while node = sub_nodes.shift
           case node
           when ExpressionTree::FunctionCall
             case node.procedure.object.name
