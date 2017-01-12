@@ -57,7 +57,7 @@ module Groonga
         end
       end
 
-      def node_estimate_size_for_query(node, query)
+      def node_estimate_size_for_query(table, node, query)
         case node
         when ExpressionTree::Variable
           estimated_costs = node.column.indexes.map do |info|
@@ -71,14 +71,22 @@ module Groonga
           estimated_costs.max
         when ExpressionTree::IndexColumn
           node.object.estimate_size(query: query)
+        when ExpressionTree::FunctionCall
+          if node.procedure.object.scorer?
+            estimated_costs = node.arguments.map do |argument|
+              node_estimate_size_for_query(table, argument, query)
+            end
+            estimated_costs.max
+          else
+            node.estimate_size(table)
+          end 
         else
-          nil
+          node.estimate_size(table)
         end
       end
 
       def sort_nodes(table, nodes)
         nodes.sort_by do |node|
-          estimated_cost = nil
           case node
           when ExpressionTree::BinaryOperation
             if node.right.is_a?(ExpressionTree::Constant)
@@ -91,17 +99,24 @@ module Groonga
                 case match_column_node
                 when ExpressionTree::LogicalOperation
                   estimated_costs = match_column_node.nodes.map do |node|
-                    node_estimate_size_for_query(node, query)
+                    case node
+                    when ExpressionTree::BinaryOperation
+                      node_estimate_size_for_query(table, node.left, query)
+                    else
+                      node_estimate_size_for_query(table, node, query)
+                    end
                   end
-                  estimated_cost = estimated_costs.max
+                  estimated_costs.max
                 when ExpressionTree::BinaryOperation
-                  estimated_cost = node_estimate_size_for_query(match_column_node.left, query)
+                  node_estimate_size_for_query(table, match_column_node.left, query)
                 else
-                  estimated_cost = node_estimate_size_for_query(match_column_node, query)
+                  node_estimate_size_for_query(table, match_column_node, query)
                 end
               else
-                estimated_cost = node_estimate_size_for_query(node.left, query)
+                node_estimate_size_for_query(table, node.left, query)
               end
+            else
+              node.estimate_size(table)
             end
           when ExpressionTree::FunctionCall
             case node.procedure.object.name
@@ -109,13 +124,12 @@ module Groonga
               column = node.arguments.first
               queries = node.arguments.select { |argument| argument.is_a?(ExpressionTree::Constant) }
               estimated_costs = queries.map do |query|
-                node_estimate_size_for_query(column, query.value)
+                node_estimate_size_for_query(table, column, query.value)
               end
-              estimated_cost = estimated_costs.max
+              estimated_costs.max
+            else
+              node.estimate_size(table)
             end
-          end
-          if estimated_cost
-            estimated_cost
           else
             node.estimate_size(table)
           end
