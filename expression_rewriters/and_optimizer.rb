@@ -58,17 +58,26 @@ module Groonga
       end
 
       def node_estimate_size_for_query(table, node, query)
+        p node
         case node
         when ExpressionTree::Variable
           estimated_costs = node.column.indexes.map do |info|
             info.index.estimate_size(query: query)
           end
-          estimated_costs.max
+          if estimated_costs.any?
+            estimated_costs.max
+          else
+            node.estimate_size(table)
+          end
         when ExpressionTree::Accessor
           estimated_costs = node.object.indexes.map do |info|
             info.index.estimate_size(query: query)
           end
-          estimated_costs.max
+          if estimated_costs.any?
+            estimated_costs.max
+          else
+            node.estimate_size(table)
+          end
         when ExpressionTree::IndexColumn
           node.object.estimate_size(query: query)
         when ExpressionTree::FunctionCall
@@ -77,6 +86,11 @@ module Groonga
               node_estimate_size_for_query(table, argument, query)
             end
             estimated_costs.max
+            if estimated_costs.any?
+              estimated_costs.max
+            else
+              node.estimate_size(table)
+            end
           else
             node.estimate_size(table)
           end 
@@ -126,7 +140,11 @@ module Groonga
               estimated_costs = queries.map do |query|
                 node_estimate_size_for_query(table, column, query.value)
               end
-              estimated_costs.max
+              if estimated_costs.any?
+                estimated_costs.max
+              else
+                node.estimate_size(table)
+              end
             else
               node.estimate_size(table)
             end
