@@ -58,7 +58,6 @@ module Groonga
       end
 
       def node_estimate_size_for_query(table, node, query)
-        p node
         case node
         when ExpressionTree::Variable
           estimated_costs = node.column.indexes.map do |info|
