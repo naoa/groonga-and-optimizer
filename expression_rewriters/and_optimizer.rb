@@ -27,7 +27,7 @@ module Groonga
         codes = @expression.codes
         codes.each do |code|
           case code.op
-          when Operator::NEAR, Operator::SIMILAR
+          when Operator::NEAR, Operator::NEAR2, Operator::SIMILAR
             unsupported = true
           when Operator::PUSH
             case code.value
